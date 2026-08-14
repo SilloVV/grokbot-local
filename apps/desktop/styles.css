@@ -1,0 +1,58 @@
+:root {
+  color-scheme: dark;
+  --bg: #12141a;
+  --panel: #1a1d26;
+  --line: #2a2f3c;
+  --text: #e8eaf0;
+  --muted: #8b93a7;
+  --accent: #7aa2ff;
+  --user: #2a3348;
+  --bot: #1e2430;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
+body { display: grid; grid-template-columns: 260px 1fr; }
+.sidebar {
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 10px;
+}
+.brand { display: flex; justify-content: space-between; align-items: center; }
+.pill { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #3a2430; color: #f0a0a0; }
+.pill.on { background: #1e3a2f; color: #8ee0b0; }
+button, select, input, textarea {
+  font: inherit;
+  color: var(--text);
+  background: #10131a;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+button { cursor: pointer; background: var(--accent); color: #0d1118; border: 0; font-weight: 600; }
+.thread-list { flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 4px; }
+.thread-list button {
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-weight: 500;
+}
+.thread-list button.active { background: #243049; }
+.routines { border-top: 1px solid var(--line); padding-top: 8px; }
+.routines h2 { margin: 0 0 6px; font-size: 13px; color: var(--muted); }
+.routines ul { list-style: none; margin: 0; padding: 0; font-size: 12px; color: var(--muted); }
+.routines form { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.main { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; }
+.toolbar { display: flex; gap: 16px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.muted { color: var(--muted); font-size: 13px; margin: 0; }
+.messages { overflow: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.bubble { max-width: 72%; padding: 10px 12px; border-radius: 12px; white-space: pre-wrap; line-height: 1.4; }
+.bubble.user { align-self: flex-end; background: var(--user); }
+.bubble.assistant { align-self: flex-start; background: var(--bot); }
+.bubble.system { align-self: center; color: var(--muted); font-size: 12px; background: transparent; }
+.empty { margin: auto; color: var(--muted); }
+.composer { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
+.composer textarea { resize: none; }
