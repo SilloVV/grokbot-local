@@ -56,3 +56,5 @@ button { cursor: pointer; background: var(--accent); color: #0d1118; border: 0; 
 .empty { margin: auto; color: var(--muted); }
 .composer { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
 .composer textarea { resize: none; }
+.vm-box { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+.vm-box button { padding: 6px 10px; font-size: 12px; }

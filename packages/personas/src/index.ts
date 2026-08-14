@@ -1,13 +1,8 @@
 /**
  * Persona registry.
  *
- * Personas are YAML files under personas/ at the repo root. Drop a new
- * file there — no code change required. All personas are system-prompt
- * variations over the same underlying model.
- *
- * Switching persona on a thread MUST NOT wipe memory. Only personaId
- * (and therefore the system prompt / tone / inference params) changes;
- * MemoryStore messages stay put.
+ * Personas are YAML files under personas/. Optional `vm` block describes
+ * the dedicated isolated VM for that personality.
  *
  * @packageDocumentation
  */
@@ -16,7 +11,13 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
 
-/** Matches the YAML schema in personas/*.yaml. */
+export interface PersonaVmConfig {
+  enabled?: boolean;
+  image?: string;
+  memory?: string;
+  cpus?: string;
+}
+
 export interface Persona {
   id: string;
   name: string;
@@ -27,10 +28,10 @@ export interface Persona {
     temperature: number;
     max_tokens: number;
   };
+  vm?: PersonaVmConfig;
 }
 
 export interface PersonaRegistry {
-  /** Load every *.yaml file from personas/ (or dir). */
   loadAll(dir?: string): Promise<Persona[]>;
   get(id: string): Promise<Persona | undefined>;
 }
@@ -50,10 +51,6 @@ function isPersona(value: unknown): value is Persona {
   );
 }
 
-/**
- * File-backed registry. Reads YAML from disk on each loadAll (no cache
- * yet — scaffolding only).
- */
 export class FilePersonaRegistry implements PersonaRegistry {
   constructor(private readonly dir: string) {}
 

@@ -12,7 +12,11 @@ import {
 import { SqliteMemoryStore } from "@grokbot/memory";
 import { FilePersonaRegistry } from "@grokbot/personas";
 import { InMemoryRoutineEngine, RoutineScheduler } from "@grokbot/routines";
-import { createSandbox, sandboxConfigFromEnv } from "@grokbot/sandbox";
+import {
+  createSandbox,
+  DockerPersonaVmManager,
+  sandboxConfigFromEnv,
+} from "@grokbot/sandbox";
 import { handleUserMessage } from "./agent.js";
 import { loadEnvFile } from "./env.js";
 import { createApp } from "./routes.js";
@@ -41,6 +45,11 @@ const router = new KeepAliveModelRouter(client, new OllamaUnloader(inferenceBase
 
 const sandboxCfg = sandboxConfigFromEnv();
 const sandbox = createSandbox(sandboxCfg);
+const vms = new DockerPersonaVmManager(
+  sandboxCfg.dockerBin ?? "docker",
+  undefined,
+  sandboxCfg.image ?? "node:22-alpine",
+);
 const memory = new SqliteMemoryStore(dbPath);
 const personas = new FilePersonaRegistry(personasDir);
 const routines = new InMemoryRoutineEngine();
@@ -52,6 +61,7 @@ const app = createApp({
   sandbox,
   sandboxMode: sandboxCfg.mode,
   routines,
+  vms,
   inferenceReachable: async () => {
     try {
       const native = inferenceBase.replace(/\/$/, "").replace(/\/v1$/, "");

@@ -9,3 +9,8 @@ tone: sarcastic
 inference:
   temperature: 0.8
   max_tokens: 2048
+vm:
+  enabled: true
+  image: node:22-alpine
+  memory: 512m
+  cpus: "1"

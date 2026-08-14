@@ -31,3 +31,5 @@ Personas are system-prompt variations over the same model. Switching persona on 
 | `@grokbot/sandbox` | Isolated command execution (Docker local / E2B remote) |
 | `@grokbot/routines` | Scheduled / triggered prompts |
 | `@grokbot/personas` | YAML loader + registry |
+
+Each persona can own a dedicated VM (Docker container + volume). Create it with POST /personas/:id/vm. Commands on a thread use that VM when it is running.

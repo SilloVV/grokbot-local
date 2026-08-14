@@ -10,3 +10,8 @@ tone: concise
 inference:
   temperature: 0.3
   max_tokens: 1024
+vm:
+  enabled: true
+  image: node:22-alpine
+  memory: 512m
+  cpus: "1"

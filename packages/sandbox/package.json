@@ -10,7 +10,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "tsx --test src/docker-executor.test.ts"
+    "test": "tsx --test src/docker-executor.test.ts src/persona-vm.test.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

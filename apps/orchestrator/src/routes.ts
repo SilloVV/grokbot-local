@@ -1,5 +1,6 @@
 /**
- * HTTP routes. SQLite memory + model router + isolated sandbox + routines.
+ * HTTP routes. SQLite memory + model router + isolated sandbox +
+ * per-persona VMs + routines.
  */
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -7,7 +8,7 @@ import type { ModelRouter } from "@grokbot/inference";
 import type { MemoryStore, ThreadMessage } from "@grokbot/memory";
 import type { PersonaRegistry } from "@grokbot/personas";
 import type { RoutineEngine } from "@grokbot/routines";
-import type { SandboxExecutor, SandboxMode } from "@grokbot/sandbox";
+import type { PersonaVmManager, SandboxExecutor, SandboxMode } from "@grokbot/sandbox";
 import { handleUserMessage } from "./agent.js";
 
 export interface RouteDeps {
@@ -17,6 +18,7 @@ export interface RouteDeps {
   sandbox: SandboxExecutor;
   sandboxMode: SandboxMode;
   routines: RoutineEngine;
+  vms: PersonaVmManager;
   inferenceReachable?: () => Promise<boolean>;
 }
 
@@ -39,6 +41,35 @@ export function createApp(deps: RouteDeps): Hono {
   });
 
   app.get("/personas", async (c) => c.json(await deps.personas.loadAll()));
+
+  app.get("/personas/:id/vm", async (c) => {
+    const persona = await deps.personas.get(c.req.param("id"));
+    if (!persona) return c.json({ error: "unknown persona" }, 404);
+    return c.json(await deps.vms.status(persona.id));
+  });
+
+  app.post("/personas/:id/vm", async (c) => {
+    const persona = await deps.personas.get(c.req.param("id"));
+    if (!persona) return c.json({ error: "unknown persona" }, 404);
+    const body = await c.req.json<{ action?: string }>().catch(() => ({}));
+    const action = body.action ?? "create";
+    try {
+      if (action === "start") return c.json(await deps.vms.start(persona.id));
+      if (action === "stop") return c.json(await deps.vms.stop(persona.id));
+      if (action === "destroy") return c.json(await deps.vms.destroy(persona.id));
+      return c.json(await deps.vms.create(persona.id, persona.vm), 201);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "vm error";
+      return c.json({ error: message }, 500);
+    }
+  });
+
+  app.delete("/personas/:id/vm", async (c) => {
+    const persona = await deps.personas.get(c.req.param("id"));
+    if (!persona) return c.json({ error: "unknown persona" }, 404);
+    return c.json(await deps.vms.destroy(persona.id));
+  });
+
   app.get("/threads", async (c) => c.json(await deps.memory.listThreads()));
 
   app.post("/threads", async (c) => {
@@ -98,6 +129,10 @@ export function createApp(deps: RouteDeps): Hono {
     }>();
     if (!body.command) return c.json({ error: "command required" }, 400);
     try {
+      const vm = await deps.vms.status(thread.personaId);
+      if (vm.state === "running") {
+        return c.json(await deps.vms.exec(thread.personaId, body.command, body.timeoutMs));
+      }
       const result = await deps.sandbox.run({
         command: body.command,
         files: body.files,

@@ -213,3 +213,36 @@ function showError(err) {
   }
   setInterval(ping, 8000);
 })();
+
+const vmState = document.getElementById("vm-state");
+const vmCreate = document.getElementById("vm-create");
+const vmStop = document.getElementById("vm-stop");
+const vmDestroy = document.getElementById("vm-destroy");
+
+async function refreshVm() {
+  const id = els.persona.value;
+  if (!id || !vmState) return;
+  try {
+    const st = await api(`/personas/${id}/vm`);
+    vmState.textContent = `VM: ${st.state}`;
+  } catch {
+    vmState.textContent = "VM: —";
+  }
+}
+
+async function vmAction(action) {
+  const id = els.persona.value;
+  if (!id) return;
+  await api(`/personas/${id}/vm`, {
+    method: "POST",
+    body: JSON.stringify({ action }),
+  });
+  await refreshVm();
+}
+
+if (vmCreate) vmCreate.addEventListener("click", () => vmAction("create").catch(showError));
+if (vmStop) vmStop.addEventListener("click", () => vmAction("stop").catch(showError));
+if (vmDestroy) vmDestroy.addEventListener("click", () => vmAction("destroy").catch(showError));
+els.persona.addEventListener("change", () => refreshVm().catch(showError));
+setInterval(() => { void refreshVm(); }, 10000);
+void refreshVm();

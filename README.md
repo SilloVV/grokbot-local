@@ -41,3 +41,5 @@ Test-phase models (`qwen2.5:0.5b` + `qwen3.5:4b`) fit in far less VRAM. Do **not
 - Rust optional for the desktop window
 
 Routines use a 5-field cron in local time, or trigger on_startup. The API ticks them and writes into a thread.
+
+Each persona can have its own isolated VM. Create it from the desktop or POST /personas/ID/vm.
