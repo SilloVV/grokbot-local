@@ -4,9 +4,14 @@
 # The desktop app is a Tauri native shell — do not containerize it.
 #
 # Sandbox containers are spawned on demand by the orchestrator
-# (SANDBOX_MODE=local). They are not declared as Compose services.
-# Optional later: a sandbox-base image (e.g. node:22-alpine with
-# networking disabled) that the orchestrator uses as the spawn template.
+# (SANDBOX_MODE=local). They are not long-running Compose services.
+# Build the optional base image:
+#   docker build -t grokbot-sandbox:local packages/sandbox/image
+# then set SANDBOX_IMAGE=grokbot-sandbox:local
+#
+# The orchestrator container needs access to the host Docker socket
+# to spawn sandbox containers. That is the only host surface; user
+# commands still run inside --network none --cap-drop ALL containers.
 
 services:
   orchestrator:
@@ -22,3 +27,7 @@ services:
       INFERENCE_BASE_URL: http://host.docker.internal:11434/v1
       ORCHESTRATOR_HOST: 0.0.0.0
       ORCHESTRATOR_PORT: "8787"
+      SANDBOX_MODE: local
+      SANDBOX_DOCKER_BIN: docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

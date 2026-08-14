@@ -1,6 +1,6 @@
 # Contributing
 
-Skeleton-stage notes. Keep changes small.
+Keep changes small.
 
 ## Code style
 
@@ -19,8 +19,8 @@ Personas are system-prompt variations over the same model. Switching persona on 
 ## Adding a tool / action
 
 1. Put the executor behind `SandboxExecutor` (`packages/sandbox`). Never run on the host.
-2. If the desktop or another client needs it, add a thin route on the orchestrator (`apps/orchestrator/src/routes.ts`) that calls the executor.
-3. Keep the route a stub until the sandbox backend exists.
+2. `SANDBOX_MODE=local` spawns a locked-down Docker container (`--network none`, `--cap-drop ALL`). `SANDBOX_MODE=remote` uses E2B.
+3. Expose it via `POST /threads/:id/sandbox` with `{ "command", "files?", "timeoutMs?" }`.
 
 ## Packages
 

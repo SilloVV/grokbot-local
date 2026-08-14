@@ -11,6 +11,7 @@ import {
 } from "@grokbot/inference";
 import { SqliteMemoryStore } from "@grokbot/memory";
 import { FilePersonaRegistry } from "@grokbot/personas";
+import { createSandbox, sandboxConfigFromEnv } from "@grokbot/sandbox";
 import { createApp } from "./routes.js";
 
 const host = process.env.ORCHESTRATOR_HOST ?? "127.0.0.1";
@@ -32,10 +33,15 @@ const router = new KeepAliveModelRouter(client, new OllamaUnloader(inferenceBase
   mainNumCtx: Number(process.env.MODEL_MAIN_NUM_CTX ?? 4096),
 });
 
+const sandboxCfg = sandboxConfigFromEnv();
+const sandbox = createSandbox(sandboxCfg);
+
 const app = createApp({
   memory: new SqliteMemoryStore(dbPath),
   personas: new FilePersonaRegistry(personasDir),
   router,
+  sandbox,
+  sandboxMode: sandboxCfg.mode,
   inferenceReachable: async () => {
     try {
       const native = inferenceBase.replace(/\/$/, "").replace(/\/v1$/, "");
@@ -49,4 +55,5 @@ const app = createApp({
 
 serve({ fetch: app.fetch, hostname: host, port }, (info) => {
   console.log(`orchestrator listening on http://${info.address}:${info.port}`);
+  console.log(`sandbox mode=${sandboxCfg.mode} image=${sandboxCfg.image}`);
 });

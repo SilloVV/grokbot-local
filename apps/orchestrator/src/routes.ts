@@ -1,11 +1,12 @@
 /**
- * HTTP routes. SQLite memory + real model router for chat turns.
- * Routines stay in-memory. Sandbox is not called.
+ * HTTP routes. SQLite memory + model router + isolated sandbox.
+ * Routines stay in-memory.
  */
 import { Hono } from "hono";
 import type { ModelRouter } from "@grokbot/inference";
 import type { MemoryStore, ThreadMessage } from "@grokbot/memory";
 import type { PersonaRegistry } from "@grokbot/personas";
+import type { SandboxExecutor, SandboxMode } from "@grokbot/sandbox";
 import { InMemoryRoutineEngine } from "@grokbot/routines";
 import { handleUserMessage } from "./agent.js";
 
@@ -13,6 +14,8 @@ export interface RouteDeps {
   memory: MemoryStore;
   personas: PersonaRegistry;
   router: ModelRouter;
+  sandbox: SandboxExecutor;
+  sandboxMode: SandboxMode;
   inferenceReachable?: () => Promise<boolean>;
 }
 
@@ -27,7 +30,11 @@ export function createApp(deps: RouteDeps): Hono {
     } catch {
       reachable = false;
     }
-    return c.json({ ok: true as const, inference: { configured: true, reachable } });
+    return c.json({
+      ok: true as const,
+      inference: { configured: true, reachable },
+      sandbox: { mode: deps.sandboxMode },
+    });
   });
 
   app.get("/personas", async (c) => c.json(await deps.personas.loadAll()));
@@ -77,6 +84,30 @@ export function createApp(deps: RouteDeps): Hono {
       return c.json(thread);
     } catch {
       return c.json({ error: "not found" }, 404);
+    }
+  });
+
+  app.post("/threads/:id/sandbox", async (c) => {
+    const id = c.req.param("id");
+    const thread = await deps.memory.getThread(id);
+    if (!thread) return c.json({ error: "not found" }, 404);
+    const body = await c.req.json<{
+      command?: string;
+      files?: Record<string, string>;
+      timeoutMs?: number;
+    }>();
+    if (!body.command) return c.json({ error: "command required" }, 400);
+    try {
+      const result = await deps.sandbox.run({
+        command: body.command,
+        files: body.files,
+        timeoutMs: body.timeoutMs,
+        threadId: id,
+      });
+      return c.json(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "sandbox error";
+      return c.json({ error: message }, 500);
     }
   });
 
