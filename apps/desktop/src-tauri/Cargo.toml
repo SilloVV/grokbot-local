@@ -1,0 +1,13 @@
+[package]
+name = "grokbot-local"
+version = "0.0.0"
+description = "grokbot-local desktop shell (Tauri 2 placeholder)"
+authors = ["SilloVV"]
+license = "Apache-2.0"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }

@@ -1,0 +1,25 @@
+{
+  "name": "@grokbot/orchestrator",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@grokbot/inference": "workspace:*",
+    "@grokbot/memory": "workspace:*",
+    "@grokbot/personas": "workspace:*",
+    "@grokbot/routines": "workspace:*",
+    "@grokbot/sandbox": "workspace:*",
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

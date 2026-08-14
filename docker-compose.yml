@@ -1,0 +1,24 @@
+# Ollama runs on the HOST, not in Compose.
+# Point the API at it via host.docker.internal (see INFERENCE_BASE_URL).
+#
+# The desktop app is a Tauri native shell — do not containerize it.
+#
+# Sandbox containers are spawned on demand by the orchestrator
+# (SANDBOX_MODE=local). They are not declared as Compose services.
+# Optional later: a sandbox-base image (e.g. node:22-alpine with
+# networking disabled) that the orchestrator uses as the spawn template.
+
+services:
+  orchestrator:
+    build:
+      context: .
+      dockerfile: apps/orchestrator/Dockerfile
+    ports:
+      - "8787:8787"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file: .env
+    environment:
+      INFERENCE_BASE_URL: http://host.docker.internal:11434/v1
+      ORCHESTRATOR_HOST: 0.0.0.0
+      ORCHESTRATOR_PORT: "8787"

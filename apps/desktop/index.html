@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>grokbot-local</title>
+    <style>
+      :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+      body { margin: 2rem; max-width: 40rem; }
+      label, select, textarea, button { display: block; margin: 0.5rem 0; }
+      textarea { width: 100%; min-height: 8rem; }
+      .note { color: #9aa; font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <h1>grokbot-local</h1>
+    <p class="note">
+      Placeholder UI. Talks to the orchestrator at
+      <code>http://127.0.0.1:8787</code> (not wired yet).
+    </p>
+    <label for="persona">Persona</label>
+    <select id="persona">
+      <option value="factual">Factual</option>
+      <option value="creative">Creative</option>
+      <option value="coder">Coder</option>
+      <option value="grok">Grok</option>
+    </select>
+    <label for="chat">Chat</label>
+    <textarea id="chat" placeholder="Chat placeholder — no inference yet."></textarea>
+    <button type="button" disabled>Send (not implemented)</button>
+  </body>
+</html>
