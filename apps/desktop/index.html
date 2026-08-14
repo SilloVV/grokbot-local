@@ -3,48 +3,98 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>grokbot-local</title>
+    <title>grok</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <aside class="sidebar">
+    <aside class="rail">
       <header class="brand">
-        <strong>grokbot-local</strong>
+        <strong>grok</strong>
+        <span class="pill wordmark">local</span>
         <span id="health" class="pill off">API</span>
       </header>
-      <button id="new-thread" type="button">New thread</button>
-      <nav id="threads" class="thread-list"></nav>
+
+      <button id="new-thread" type="button" class="new-chat">
+        <span class="plus">+</span>
+        New chat
+      </button>
+
+      <h2 class="section-label">Bots</h2>
+      <nav id="bots" class="bot-list" aria-label="Bots"></nav>
+
+      <h2 class="section-label">Chats</h2>
+      <nav id="threads" class="thread-list" aria-label="Chats"></nav>
+
       <section class="routines">
-        <h2>Routines</h2>
+        <h2 class="section-label">Routines</h2>
         <ul id="routines"></ul>
         <form id="routine-form">
           <input name="name" placeholder="Name" required />
-          <input name="schedule" placeholder="Cron (0 8 * * 1-5)" />
+          <input name="schedule" placeholder="0 8 * * 1-5" />
           <input name="prompt" placeholder="Prompt" required />
           <button type="submit">Add</button>
         </form>
       </section>
     </aside>
-    <main class="main">
-      <header class="toolbar">
-        <label>
-          Persona
-          <select id="persona"></select>
-        </label>
-        <p id="persona-desc" class="muted"></p>
-        <div class="vm-box">
-          <span id="vm-state" class="muted">VM: —</span>
-          <button id="vm-create" type="button">Create VM</button>
-          <button id="vm-stop" type="button">Stop</button>
-          <button id="vm-destroy" type="button">Destroy</button>
+
+    <main class="chat">
+      <header class="chat-head">
+        <div class="chat-identity">
+          <h1 id="bot-name">grok</h1>
+          <p id="persona-desc" class="muted"></p>
         </div>
+        <label class="sr-only" for="persona">Persona</label>
+        <select id="persona" hidden></select>
       </header>
+
       <section id="messages" class="messages"></section>
+
       <form id="composer" class="composer">
-        <textarea id="input" rows="2" placeholder="Message…" required></textarea>
-        <button type="submit">Send</button>
+        <textarea id="input" rows="1" placeholder="Ask anything" required></textarea>
+        <button type="submit" aria-label="Send">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path fill="currentColor" d="M12 4l-1.4 1.4 5.6 5.6H4v2h12.2l-5.6 5.6L12 20l8-8z" transform="rotate(-90 12 12)" />
+          </svg>
+        </button>
       </form>
     </main>
+
+    <aside class="computer" aria-label="Computer">
+      <header class="computer-head">
+        <div class="computer-title">
+          <span class="led" data-led></span>
+          <h2>Computer</h2>
+        </div>
+        <span id="vm-state" class="vm-state">VM: —</span>
+      </header>
+
+      <div class="vm-actions">
+        <button id="vm-create" type="button">Create</button>
+        <button id="vm-start" type="button">Start</button>
+        <button id="vm-stop" type="button">Stop</button>
+        <button id="vm-destroy" type="button">Destroy</button>
+      </div>
+
+      <div id="computer-frame" class="monitor missing" data-state="missing">
+        <div class="bezel">
+          <div class="screen">
+            <div class="scanlines"></div>
+            <div class="screen-inner">
+              <p class="screen-status">desktop offline</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form id="sandbox-form" class="sandbox">
+        <label class="sr-only" for="sandbox-cmd">Command</label>
+        <span class="prompt">$</span>
+        <input id="sandbox-cmd" name="command" placeholder="run a command" autocomplete="off" />
+        <button type="submit">Exec</button>
+      </form>
+      <pre id="sandbox-out" class="sandbox-out" aria-live="polite"></pre>
+    </aside>
+
     <script src="./app.js"></script>
   </body>
 </html>

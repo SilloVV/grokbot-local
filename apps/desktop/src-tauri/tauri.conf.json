@@ -11,10 +11,10 @@
     "windows": [
       {
         "label": "main",
-        "title": "grokbot-local",
-        "width": 1100,
-        "height": 740,
-        "minWidth": 800,
+        "title": "grok",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 1000,
         "minHeight": 560
       }
     ],

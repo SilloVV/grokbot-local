@@ -4,6 +4,17 @@ Open-source, self-hosted Grok-like assistant. 100% local inference, a Tauri desk
 
 Local install is supported. Orchestrator, sandbox, and Tauri UI are in the tree.
 
+## Why this vs Rakazo
+
+Rakazo is a polished Grok-like desktop, but it leans on cloud pieces. grokbot-local is the same product shape, fully on your machine:
+
+- **100% local Ollama** — no OpenRouter, no remote LLM fallback.
+- **Tauri, not Electron** — small native window, no Chromium bundle.
+- **SQLite, not Postgres** — memory lives in a local file; no database server to run.
+- **VRAM `keep_alive`** — ModelRouter never keeps main and small loaded together.
+- **Per-persona isolated Docker VM** — each bot gets its own sandbox computer.
+- **No auth required** — loopback API at `http://127.0.0.1:8787`.
+
 ## Architecture
 
 ```mermaid
