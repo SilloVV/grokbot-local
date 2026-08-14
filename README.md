@@ -39,3 +39,5 @@ Test-phase models (`qwen2.5:0.5b` + `qwen3.5:4b`) fit in far less VRAM. Do **not
 - Ollama on the host
 - Docker optional
 - Rust optional for the desktop window
+
+Routines use a 5-field cron in local time, or trigger on_startup. The API ticks them and writes into a thread.

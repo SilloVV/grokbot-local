@@ -1,13 +1,13 @@
 /**
- * HTTP routes. SQLite memory + model router + isolated sandbox.
- * Routines stay in-memory.
+ * HTTP routes. SQLite memory + model router + isolated sandbox + routines.
  */
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import type { ModelRouter } from "@grokbot/inference";
 import type { MemoryStore, ThreadMessage } from "@grokbot/memory";
 import type { PersonaRegistry } from "@grokbot/personas";
+import type { RoutineEngine } from "@grokbot/routines";
 import type { SandboxExecutor, SandboxMode } from "@grokbot/sandbox";
-import { InMemoryRoutineEngine } from "@grokbot/routines";
 import { handleUserMessage } from "./agent.js";
 
 export interface RouteDeps {
@@ -16,12 +16,13 @@ export interface RouteDeps {
   router: ModelRouter;
   sandbox: SandboxExecutor;
   sandboxMode: SandboxMode;
+  routines: RoutineEngine;
   inferenceReachable?: () => Promise<boolean>;
 }
 
 export function createApp(deps: RouteDeps): Hono {
-  const routines = new InMemoryRoutineEngine();
   const app = new Hono();
+  app.use("*", cors());
 
   app.get("/health", async (c) => {
     let reachable = false;
@@ -38,7 +39,6 @@ export function createApp(deps: RouteDeps): Hono {
   });
 
   app.get("/personas", async (c) => c.json(await deps.personas.loadAll()));
-
   app.get("/threads", async (c) => c.json(await deps.memory.listThreads()));
 
   app.post("/threads", async (c) => {
@@ -111,7 +111,7 @@ export function createApp(deps: RouteDeps): Hono {
     }
   });
 
-  app.get("/routines", async (c) => c.json(await routines.list()));
+  app.get("/routines", async (c) => c.json(await deps.routines.list()));
 
   app.post("/routines", async (c) => {
     const body = await c.req.json<{
@@ -121,7 +121,8 @@ export function createApp(deps: RouteDeps): Hono {
       prompt: string;
       enabled?: boolean;
     }>();
-    const routine = await routines.create({
+    if (!body.name || !body.prompt) return c.json({ error: "name and prompt required" }, 400);
+    const routine = await deps.routines.create({
       name: body.name,
       schedule: body.schedule,
       trigger: body.trigger,
@@ -129,6 +130,19 @@ export function createApp(deps: RouteDeps): Hono {
       enabled: body.enabled ?? true,
     });
     return c.json(routine, 201);
+  });
+
+  app.post("/routines/:id/pause", async (c) => {
+    try {
+      return c.json(await deps.routines.pause(c.req.param("id")));
+    } catch {
+      return c.json({ error: "not found" }, 404);
+    }
+  });
+
+  app.delete("/routines/:id", async (c) => {
+    await deps.routines.delete(c.req.param("id"));
+    return c.body(null, 204);
   });
 
   return app;
