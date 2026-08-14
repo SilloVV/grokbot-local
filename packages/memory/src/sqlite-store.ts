@@ -21,7 +21,7 @@ interface MessageRow {
 }
 
 /**
- * SQLite MemoryStore. Default path: ./data/grokbot.db
+ * SQLite MemoryStore. Default path: ./data/vrac.db
  * Switching persona updates persona_id only — messages stay.
  */
 export class SqliteMemoryStore implements MemoryStore {

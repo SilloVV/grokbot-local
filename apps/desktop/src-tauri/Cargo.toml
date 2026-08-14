@@ -1,7 +1,7 @@
 [package]
-name = "grokbot-local"
+name = "vrac"
 version = "0.0.0"
-description = "Native Tauri shell for grokbot-local"
+description = "Native Tauri shell for Vrac"
 authors = ["SilloVV"]
 license = "Apache-2.0"
 edition = "2021"

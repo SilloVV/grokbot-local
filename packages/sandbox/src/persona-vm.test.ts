@@ -9,9 +9,9 @@ import {
 import type { ArgvRunner, SandboxRunResult } from "./types.js";
 
 test("names are isolated per persona", () => {
-  assert.equal(vmName("coder"), "grokbot-vm-coder");
-  assert.equal(volumeName("coder"), "grokbot-vm-coder-data");
-  assert.notEqual(vmName("coder"), vmName("grok"));
+  assert.equal(vmName("coder"), "vrac-vm-coder");
+  assert.equal(volumeName("coder"), "vrac-vm-coder-data");
+  assert.notEqual(vmName("coder"), vmName("vrac"));
 });
 
 test("create argv is locked down and uses a dedicated volume", () => {
@@ -20,8 +20,8 @@ test("create argv is locked down and uses a dedicated volume", () => {
   assert.ok(argv.includes("--network"));
   assert.ok(argv.includes("none"));
   assert.ok(argv.includes("--cap-drop"));
-  assert.ok(argv.includes("grokbot-vm-coder"));
-  assert.ok(argv.includes("grokbot-vm-coder-data:/work"));
+  assert.ok(argv.includes("vrac-vm-coder"));
+  assert.ok(argv.includes("vrac-vm-coder-data:/work"));
   assert.equal(argv.includes("sh"), false);
 });
 
@@ -37,5 +37,5 @@ test("create then exec never shells the user command on the host", async () => {
   const vms = new DockerPersonaVmManager("docker", runner);
   await vms.create("coder", { image: "node:22-alpine" });
   assert.ok(seen.some((a) => a.includes("volume") && a.includes("create")));
-  assert.ok(seen.some((a) => a[1] === "run" && a.includes("grokbot-vm-coder")));
+  assert.ok(seen.some((a) => a[1] === "run" && a.includes("vrac-vm-coder")));
 });

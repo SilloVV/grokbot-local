@@ -6,8 +6,8 @@
 # Sandbox containers are spawned on demand by the orchestrator
 # (SANDBOX_MODE=local). They are not long-running Compose services.
 # Build the optional base image:
-#   docker build -t grokbot-sandbox:local packages/sandbox/image
-# then set SANDBOX_IMAGE=grokbot-sandbox:local
+#   docker build -t vrac-sandbox:local packages/sandbox/image
+# then set SANDBOX_IMAGE=vrac-sandbox:local
 #
 # The orchestrator container needs access to the host Docker socket
 # to spawn sandbox containers. That is the only host surface; user

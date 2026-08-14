@@ -33,11 +33,11 @@ export function safePersonaId(id: string): string {
 }
 
 export function vmName(personaId: string): string {
-  return `grokbot-vm-${safePersonaId(personaId)}`;
+  return `vrac-vm-${safePersonaId(personaId)}`;
 }
 
 export function volumeName(personaId: string): string {
-  return `grokbot-vm-${safePersonaId(personaId)}-data`;
+  return `vrac-vm-${safePersonaId(personaId)}-data`;
 }
 
 export function buildCreateArgv(

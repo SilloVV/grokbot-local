@@ -188,7 +188,7 @@ input:focus, textarea:focus, select:focus {
 .avatar.factual { background: var(--factual); }
 .avatar.creative { background: var(--creative); }
 .avatar.coder { background: var(--coder); }
-.avatar.grok { background: var(--grok); color: #1a1400; }
+.avatar.vrac { background: var(--grok); color: #1a1400; }
 
 .bot-meta { min-width: 0; }
 .bot-meta strong {

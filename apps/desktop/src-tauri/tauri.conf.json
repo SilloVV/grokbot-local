@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "grokbot-local",
+  "productName": "Vrac",
   "version": "0.0.0",
-  "identifier": "com.sillovv.grokbot-local",
+  "identifier": "com.sillovv.vrac",
   "build": {
     "frontendDist": ".."
   },
@@ -11,7 +11,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "grok",
+        "title": "vrac",
         "width": 1280,
         "height": 800,
         "minWidth": 1000,

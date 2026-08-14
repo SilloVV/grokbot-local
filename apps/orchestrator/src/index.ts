@@ -30,7 +30,7 @@ const inferenceBase = process.env.INFERENCE_BASE_URL ?? "http://127.0.0.1:11434/
 const personasDir = process.env.PERSONAS_DIR ?? join(process.cwd(), "../../personas");
 const dbPath = process.env.DATABASE_URL
   ? process.env.DATABASE_URL.replace(/^sqlite:/, "")
-  : join(process.cwd(), "../../data/grokbot.db");
+  : join(process.cwd(), "../../data/vrac.db");
 
 const client = new OpenAICompatibleClient({
   baseUrl: inferenceBase,

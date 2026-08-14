@@ -4,7 +4,7 @@ const AVATAR = {
   factual: "factual",
   creative: "creative",
   coder: "coder",
-  grok: "grok",
+  vrac: "vrac",
 };
 
 const els = {
@@ -94,7 +94,7 @@ async function ping() {
 
 function describePersona() {
   const p = personas.find((x) => x.id === selectedPersonaId());
-  if (els.botName) els.botName.textContent = p ? p.name : "grok";
+  if (els.botName) els.botName.textContent = p ? p.name : "vrac";
   if (els.personaDesc) els.personaDesc.textContent = p ? p.description : "";
 }
 
@@ -162,7 +162,7 @@ function paintComputer(state) {
     if (inner) {
       if (st === "running") {
         const id = selectedPersonaId();
-        inner.innerHTML = `<div class="desktop-bar"><span>grokbot-vm-${escapeHtml(id)}</span><span>online</span></div>
+        inner.innerHTML = `<div class="desktop-bar"><span>vrac-vm-${escapeHtml(id)}</span><span>online</span></div>
           <div class="desktop-term"><div class="cwd">/work</div><div>$ <span class="blink"></span></div></div>`;
       } else if (st === "stopped" || st === "created") {
         inner.innerHTML = `<p class="screen-status">desktop ${escapeHtml(st)}</p>`;

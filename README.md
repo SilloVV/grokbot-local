@@ -1,12 +1,12 @@
-# grokbot-local
+# Vrac
 
-Open-source, self-hosted Grok-like assistant. 100% local inference, a Tauri desktop shell, and a Docker sandbox for tools. Apache-2.0.
+Open-source, self-hosted local assistant. 100% local inference, a Tauri desktop shell, and a Docker sandbox for tools. Apache-2.0.
 
 Local install is supported. Orchestrator, sandbox, and Tauri UI are in the tree.
 
 ## Why this vs Rakazo
 
-Rakazo is a polished Grok-like desktop, but it leans on cloud pieces. grokbot-local is the same product shape, fully on your machine:
+Rakazo is a polished Grok-like desktop, but it leans on cloud pieces. Vrac is the same product shape, fully on your machine:
 
 - **100% local Ollama** — no OpenRouter, no remote LLM fallback.
 - **Tauri, not Electron** — small native window, no Chromium bundle.
