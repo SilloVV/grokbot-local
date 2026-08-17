@@ -2,5 +2,13 @@
   "name": "vrac",
   "version": "0.0.0",
   "private": true,
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "pull-models": "node scripts/pull-models.mjs",
+    "start": "node scripts/start.mjs",
+    "dev:api": "pnpm --filter @grokbot/orchestrator start",
+    "dev:desktop": "pnpm --filter @grokbot/desktop dev"
+  }
 }
