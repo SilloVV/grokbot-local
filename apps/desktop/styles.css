@@ -345,6 +345,31 @@ input:focus, textarea:focus, select:focus {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
+.tool-chip {
+  align-self: flex-start;
+  max-width: 86%;
+  background: #0c0c0c;
+  border: 1px solid #262626;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: #c8c8c8;
+}
+
+.tool-chip .tool-cmd {
+  color: #6ee7b7;
+  font-size: 12px;
+}
+
+.tool-chip pre {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+  font: inherit;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #bdbdbd;
+}
+
 .empty {
   margin: auto;
   color: #d8d8d8;
@@ -439,6 +464,15 @@ input:focus, textarea:focus, select:focus {
 .computer.live .led {
   background: var(--live);
   box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
+}
+
+.computer.busy .led {
+  background: #86efac;
+  box-shadow: 0 0 14px rgba(134, 239, 172, 0.9);
+}
+
+.computer.busy .monitor.running .screen {
+  box-shadow: inset 0 0 48px rgba(34, 197, 94, 0.28);
 }
 
 .vm-state {
@@ -546,6 +580,15 @@ input:focus, textarea:focus, select:focus {
 }
 
 .desktop-term .cwd { color: #6ee7b7; }
+.desktop-term.live { overflow: auto; }
+.desktop-term .term-log {
+  margin: 6px 0;
+  white-space: pre-wrap;
+  font: inherit;
+  color: #b7f5c8;
+  max-height: 120px;
+  overflow: auto;
+}
 .desktop-term .blink {
   display: inline-block;
   width: 7px;

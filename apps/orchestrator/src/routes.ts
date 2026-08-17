@@ -87,13 +87,20 @@ export function createApp(deps: RouteDeps): Hono {
     return c.json(thread);
   });
 
+  app.get("/threads/:id/computer", async (c) => {
+    const thread = await deps.memory.getThread(c.req.param("id"));
+    if (!thread) return c.json({ error: "not found" }, 404);
+    const messages = thread.messages.filter((m) => m.role === "tool");
+    return c.json({ messages });
+  });
+
   app.post("/threads/:id/messages", async (c) => {
     const id = c.req.param("id");
     const body = await c.req.json<{ content?: string; role?: ThreadMessage["role"] }>();
     if (!body.content) return c.json({ error: "content required" }, 400);
     try {
       const thread = await handleUserMessage(
-        { memory: deps.memory, personas: deps.personas, router: deps.router },
+        { memory: deps.memory, personas: deps.personas, router: deps.router, vms: deps.vms },
         id,
         body.content,
       );
