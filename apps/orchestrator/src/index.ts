@@ -79,7 +79,7 @@ const scheduler = new RoutineScheduler(routines, async (routine) => {
     const thread = await memory.createThread("factual");
     threadId = thread.id;
   }
-  await handleUserMessage({ memory, personas, router }, threadId, routine.prompt);
+  await handleUserMessage({ memory, personas, router, vms }, threadId, routine.prompt);
   return { threadId };
 });
 

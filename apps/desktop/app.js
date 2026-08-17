@@ -35,6 +35,7 @@ const els = {
 let personas = [];
 let threads = [];
 let vmByPersona = {};
+let lastTools = [];
 let currentId = null;
 let sending = false;
 
@@ -58,6 +59,24 @@ function escapeHtml(s) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function stripComputerTags(s) {
+  return String(s || "")
+    .replace(/<<<computer>>>[\s\S]*?<<<\s*\/computer>>>/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function toolChipHtml(content) {
+  const lines = String(content || "").split("\n");
+  const cmd = lines[0] || "$";
+  const body = lines.slice(1).join("\n");
+  return `<div class="tool-chip" role="status">
+      <div class="tool-cmd">${escapeHtml(cmd)}</div>
+      ${body ? `<pre>${escapeHtml(body)}</pre>` : ""}
+    </div>`;
 }
 
 function initials(name) {
@@ -139,15 +158,22 @@ function renderThreads() {
 }
 
 function renderMessages(thread) {
-  if (!thread || !(thread.messages || []).some((m) => m.role === "user" || m.role === "assistant")) {
+  const visible = (thread?.messages || []).filter(
+    (m) => m.role === "user" || m.role === "assistant" || m.role === "tool",
+  );
+  if (!thread || !visible.length) {
     els.messages.innerHTML = `<p class="empty">What do you want to know?</p>`;
     return;
   }
-  const bubbles = (thread.messages || [])
-    .filter((m) => m.role === "user" || m.role === "assistant")
-    .map((m) => `<div class="bubble ${m.role}">${escapeHtml(m.content)}</div>`)
+  const bubbles = visible
+    .map((m) => {
+      if (m.role === "tool") return toolChipHtml(m.content);
+      const text = m.role === "assistant" ? stripComputerTags(m.content) : m.content;
+      if (m.role === "assistant" && !text) return "";
+      return `<div class="bubble ${m.role}">${escapeHtml(text)}</div>`;
+    })
     .join("");
-  els.messages.innerHTML = bubbles;
+  els.messages.innerHTML = bubbles || `<p class="empty">What do you want to know?</p>`;
   els.messages.scrollTop = els.messages.scrollHeight;
 }
 
@@ -162,8 +188,11 @@ function paintComputer(state) {
     if (inner) {
       if (st === "running") {
         const id = selectedPersonaId();
-        inner.innerHTML = `<div class="desktop-bar"><span>vrac-vm-${escapeHtml(id)}</span><span>online</span></div>
-          <div class="desktop-term"><div class="cwd">/work</div><div>$ <span class="blink"></span></div></div>`;
+        const log = lastTools.slice(-4).map((m) => escapeHtml(m.content)).join("\n\n");
+        const term = log
+          ? `<div class="desktop-term live"><div class="cwd">/work</div><pre class="term-log">${log}</pre><div>$ <span class="blink"></span></div></div>`
+          : `<div class="desktop-term"><div class="cwd">/work</div><div>$ <span class="blink"></span></div></div>`;
+        inner.innerHTML = `<div class="desktop-bar"><span>vrac-vm-${escapeHtml(id)}</span><span>online</span></div>${term}`;
       } else if (st === "stopped" || st === "created") {
         inner.innerHTML = `<p class="screen-status">desktop ${escapeHtml(st)}</p>`;
       } else {
@@ -221,6 +250,7 @@ async function selectThread(id) {
   renderBots();
   renderThreads();
   renderMessages(thread);
+  await refreshComputerLog();
 }
 
 async function newThread() {
@@ -249,6 +279,11 @@ async function sendMessage(content) {
     renderBots();
     renderThreads();
     renderMessages(thread);
+    await refreshComputerLog();
+    if (els.computer && lastTools.length) {
+      els.computer.classList.add("busy");
+      setTimeout(() => els.computer.classList.remove("busy"), 900);
+    }
   } finally {
     sending = false;
     if (sendBtn) sendBtn.disabled = false;
@@ -281,12 +316,32 @@ async function loadRoutines() {
     : `<li>None</li>`;
 }
 
+async function refreshComputerLog() {
+  if (!currentId) {
+    lastTools = [];
+    return lastTools;
+  }
+  try {
+    const data = await api(`/threads/${currentId}/computer`);
+    lastTools = data.messages || [];
+  } catch {
+    lastTools = [];
+  }
+  if (els.sandboxOut && lastTools.length) {
+    els.sandboxOut.textContent = lastTools.at(-1).content;
+  }
+  const cur = vmByPersona[selectedPersonaId()];
+  if (cur) paintComputer(cur.state);
+  return lastTools;
+}
+
 async function refreshVm() {
   const id = selectedPersonaId();
   if (!id || !els.vmState) return;
   try {
     const st = await api(`/personas/${id}/vm`);
     vmByPersona[id] = st;
+    await refreshComputerLog();
     paintComputer(st.state);
     renderBots();
   } catch {
