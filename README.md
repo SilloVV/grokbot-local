@@ -6,6 +6,20 @@ Local install is supported. Orchestrator, sandbox, and Tauri UI are in the tree.
 
 ## Installation
 
+### One-click
+
+**Windows** — after cloning the repo, double-click `install.bat` at the root (or from PowerShell: `.\install.bat`). That writes `.env`, installs packages, pulls the test models if Ollama is running, starts the API, and starts the desktop if Rust can build.
+
+**Linux / macOS:**
+
+```bash
+bash scripts/install.sh
+```
+
+The installer does **not** pull the 27B model. Docker, Visual Studio, and Rust are optional and are **not** installed automatically.
+
+### Install manuelle
+
 Tutoriel Windows (PowerShell). Sous Linux et macOS, les commandes sont les mêmes.
 
 ### 1. Prérequis
