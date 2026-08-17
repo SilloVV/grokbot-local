@@ -1,10 +1,73 @@
 # Vrac
 
-Open-source, self-hosted local assistant. 100% local inference, a Tauri desktop shell, and a Docker sandbox for tools. Apache-2.0.
+**Your own team of local AI bots, in a chat app.**
+
+A self-hosted take on the Grok Bot shape — 100% local Ollama, a Tauri desktop shell, and a Docker VM per persona. Apache-2.0.
+
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![Tauri](https://img.shields.io/badge/Tauri-2-24C8DB?logo=tauri&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-100%25%20local-000000)
+![License](https://img.shields.io/badge/license-Apache--2.0-blue)
 
 Local install is supported. Orchestrator, sandbox, and Tauri UI are in the tree.
 
-## Installation
+## Why
+
+One assistant in one box is the wrong shape for agents. Vrac keeps the idea — AI as a *messaging app*: a roster of personas you chat with, each with its own tone, thread memory, and computer — and rebuilds it fully on your machine:
+
+- **100% local inference.** Bots run on Ollama on the host. No OpenRouter, no remote LLM fallback, no cloud API key.
+- **Local first.** One orchestrator on `127.0.0.1:8787` owns every turn. Threads live in SQLite, not a hosted database.
+- **Agents with hands.** Each persona can get an isolated Docker VM it drives from the Computer pane — spawned on your machine, not a cloud Box.
+
+## Features
+
+- **Personas like contacts** — YAML roster (`vrac`, `factual`, `creative`, `coder`). Same model; only prompt, tone, and sampling change. Switching persona does not wipe a thread.
+- **A computer per persona** — isolated Docker VM from the Computer pane. Chat works without Docker; tools need it.
+- **VRAM-aware routing** — ModelRouter never keeps main and small loaded together. Unloads `qwen2.5:0.5b` before `qwen3.5:4b` (`keep_alive`).
+- **Routines** — 5-field cron in local time, or `on_startup`. The API runs the prompt and writes into a thread.
+- **Loopback, no login** — API on `http://127.0.0.1:8787`. No auth, no account, no cloud key.
+- **3-pane Tauri desktop** — personas, chat, Computer. Native window, not a browser app, not containerized.
+- **Locked-down sandbox** — local Docker (`--network none`, `--cap-drop ALL`); optional E2B remote fallback.
+
+## Pourquoi Vrac vs OpenMausBot / Rakazo
+
+Same product shape (a roster of bots in a chat app). Different stack.
+
+| | OpenMausBot / Rakazo | Vrac |
+| --- | --- | --- |
+| Shell | Electron | **Tauri** |
+| Brain | Claude / Codex / Grok CLIs | **Ollama, 100% local** |
+| Computer | Cloud Box | **Docker VM per persona** |
+| Apps | Composio | none (local tools only) |
+| Memory | local folder / hosted pieces | **SQLite** |
+| Keys | provider + Composio + Box | **no cloud key** |
+
+## How it works
+
+Two processes. The Tauri desktop holds no inference of its own — it talks HTTP to the orchestrator. The orchestrator wires packages, routes models through Ollama on the host, and never executes user commands on the host.
+
+```mermaid
+flowchart LR
+  Desktop["Desktop (Tauri)"] --> API["Orchestrator API"]
+  API --> Router["ModelRouter"]
+  Router --> Ollama["Ollama /v1 on host"]
+  API --> Memory["MemoryStore"]
+  API --> Sandbox["SandboxExecutor"]
+  API --> Routines["RoutineEngine"]
+  API --> Personas["PersonaRegistry"]
+```
+
+| Layer | Where | What it does |
+| --- | --- | --- |
+| Desktop | `apps/desktop/` | Native Tauri window. 3 panes: personas, chat, Computer. Talks to `http://127.0.0.1:8787`. Not a browser app, not containerized. |
+| Orchestrator | `apps/orchestrator/` | Hono HTTP API. Wires packages; calls Ollama through the OpenAI-compatible client. |
+| ModelRouter | `packages/inference/` | Main vs small model. VRAM budget: never keep both loaded; unload small before loading main (`keep_alive`). |
+| Memory | `packages/memory/` | SQLite by default; Postgres later via `DATABASE_URL`. Switching persona does not wipe a thread. |
+| Sandbox | `packages/sandbox/` | `SANDBOX_MODE=local` (Docker, spawned on demand) or `remote` (E2B). Never execute on the host. Per-persona isolated VM via `POST /personas/:id/vm`. |
+| Routines | `packages/routines/` | Cron (5-field, local time) or `on_startup`. Writes into a thread. |
+| Personas | `packages/personas/` + `personas/` | YAML loader + registry. System-prompt variations over the same model. |
+
+## Quick start
 
 Tutoriel Windows (PowerShell). Sous Linux et macOS, les commandes sont les mêmes.
 
@@ -104,39 +167,7 @@ Compose lance **uniquement l'orchestrateur**. Ollama reste sur l'hôte (l'API le
 
 - **Port 8787 occupé** — l'API est sur `ORCHESTRATOR_HOST=127.0.0.1` et `ORCHESTRATOR_PORT=8787`.
 
-## Why this vs Rakazo
-
-Rakazo is a polished Grok-like desktop, but it leans on cloud pieces. Vrac is the same product shape, fully on your machine:
-
-- **100% local Ollama** — no OpenRouter, no remote LLM fallback.
-- **Tauri, not Electron** — small native window, no Chromium bundle.
-- **SQLite, not Postgres** — memory lives in a local file; no database server to run.
-- **VRAM `keep_alive`** — ModelRouter never keeps main and small loaded together.
-- **Per-persona isolated Docker VM** — each bot gets its own sandbox computer.
-- **No auth required** — loopback API at `http://127.0.0.1:8787`.
-
-## Architecture
-
-```mermaid
-flowchart LR
-  Desktop["Desktop (Tauri)"] --> API["Orchestrator API"]
-  API --> Router["ModelRouter"]
-  Router --> Ollama["Ollama /v1 on host"]
-  API --> Memory["MemoryStore"]
-  API --> Sandbox["SandboxExecutor"]
-  API --> Routines["RoutineEngine"]
-  API --> Personas["PersonaRegistry"]
-```
-
-- **Desktop** — native window; talks to the API at `http://127.0.0.1:8787`.
-- **Orchestrator** — Hono HTTP API. Wires packages; calls Ollama through the OpenAI-compatible client.
-- **ModelRouter** — main vs small model. VRAM budget: never keep both loaded; unload small before loading main (`keep_alive`).
-- **Memory** — SQLite by default; Postgres later via `DATABASE_URL`. Switching persona does not wipe a thread.
-- **Sandbox** — `SANDBOX_MODE=local` (Docker, spawned on demand) or `remote` (E2B). Never execute on the host.
-- **Routines** — scheduled or triggered prompts.
-- **Personas** — YAML files; system-prompt variations over the same model.
-
-## Hardware
+### Hardware
 
 - **24 GB GPU minimum** for the target 27B Q4 main model.
 - **NVMe** recommended for model load times.
@@ -144,3 +175,16 @@ flowchart LR
 
 Test-phase models (`qwen2.5:0.5b` + `qwen3.5:4b`) fit in far less VRAM. Do **not** pull the 27B until small-model e2e is validated.
 
+## Status
+
+Early but real — the loop works end to end: message -> orchestrator -> Ollama -> streamed reply -> sandbox / persona VM -> routines. Local install is supported. Orchestrator, sandbox, and Tauri UI are in the tree.
+
+Rough edges to expect: test-phase models only (`qwen2.5:0.5b` + `qwen3.5:4b`). Do **not** pull the 27B until small-model e2e is validated. Turing GPUs stay on Q4 / Q5 quants. No packaged installer yet — run from source. E2B remote sandbox is optional and unused in the default local path.
+
+Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). One branch per feature, PR into `main`.
+
+## License
+
+[Apache-2.0](LICENSE)
+
+Vrac is an independent, open-source project inspired by the Grok Bot product shape (and by open takes such as [OpenMausBot](https://github.com/milind-soni/OpenMausBot)). It is not affiliated with, endorsed by, or associated with xAI or OpenMausBot.

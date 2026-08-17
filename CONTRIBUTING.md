@@ -2,6 +2,13 @@
 
 Keep changes small.
 
+## Branches
+
+- `main` is stable. Do not push drive-by commits onto it.
+- One branch per feature: `feat/<slug>`.
+  Examples: `feat/agent-computer`, `feat/readme-compose`.
+- Open a pull request into `main`. Review lands there; `main` stays the release line.
+
 ## Code style
 
 - TypeScript, strict, small modules.
